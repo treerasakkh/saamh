@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(ls C:/Users/teera/Desktop/nextjs-projects/saamh/node_modules/.bin/next*)",
+      "WebFetch(domain:script.google.com)"
+    ]
+  }
+}
