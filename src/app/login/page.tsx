@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -20,7 +21,13 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(error.message);
+      if (error.message.includes("Invalid login credentials")) {
+        setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      } else if (error.message.includes("Email not confirmed")) {
+        setError("กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ");
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
       router.push("/dashboard");
@@ -29,51 +36,76 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">Sign in</h1>
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-900 to-blue-800 p-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl">
+        {/* Logo */}
+        <div className="mb-6 text-center">
+          <div className="mb-3 flex justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-400 text-blue-900 font-bold text-sm shadow-md">
+              ส.บ.
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">เข้าสู่ระบบ</h1>
+          <p className="text-xs text-gray-500 mt-1">ส.บ.ม.ม.ห.</p>
+        </div>
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Email
+              อีเมล
             </label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
+              placeholder="example@email.com"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
             />
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Password
+              รหัสผ่าน
             </label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition"
+              placeholder="รหัสผ่าน"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700">
               {error}
-            </p>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 transition-colors"
+            className="w-full rounded-xl bg-blue-800 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
           >
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
           </button>
         </form>
+
+        <div className="mt-5 space-y-2 text-center text-sm text-gray-500">
+          <p>
+            ยังไม่มีบัญชี?{" "}
+            <Link href="/register" className="font-semibold text-blue-700 hover:underline">
+              สมัครสมาชิก
+            </Link>
+          </p>
+          <p>
+            <Link href="/" className="text-gray-400 hover:text-gray-600 text-xs">
+              ← กลับหน้าแรก
+            </Link>
+          </p>
+        </div>
       </div>
     </main>
   );

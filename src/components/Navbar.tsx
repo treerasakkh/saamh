@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 const navLinks = [
   { href: "#home", label: "หน้าแรก" },
@@ -9,10 +11,24 @@ const navLinks = [
   { href: "#about", label: "เกี่ยวกับเรา" },
 ];
 
+const roleLabel: Record<string, string> = {
+  admin: "ผู้ดูแลระบบ",
+  member: "สมาชิก",
+  pending: "รออนุมัติ",
+};
+
+const roleBadgeColor: Record<string, string> = {
+  admin: "bg-purple-400 text-purple-900",
+  member: "bg-green-400 text-green-900",
+  pending: "bg-yellow-400 text-yellow-900",
+};
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [active, setActive] = useState("home");
+  const [user, setUser] = useState<{ email: string; role: string } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -33,6 +49,23 @@ export default function Navbar() {
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createClient();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", authUser.id)
+          .single();
+        setUser({ email: authUser.email ?? "", role: profile?.role ?? "pending" });
+      }
+      setAuthLoading(false);
+    }
+    loadUser();
   }, []);
 
   return (
@@ -71,6 +104,56 @@ export default function Navbar() {
             ))}
           </div>
 
+          {/* Auth buttons (desktop) */}
+          <div className="hidden md:flex items-center gap-2">
+            {authLoading ? (
+              <div className="h-8 w-24 rounded-lg bg-blue-700 animate-pulse" />
+            ) : user ? (
+              <>
+                {user.role && roleLabel[user.role] && (
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${roleBadgeColor[user.role] ?? "bg-gray-400 text-gray-900"}`}>
+                    {roleLabel[user.role]}
+                  </span>
+                )}
+                <Link
+                  href="/profile"
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium text-blue-100 hover:bg-blue-700 hover:text-white transition-all"
+                >
+                  โปรไฟล์
+                </Link>
+                {user.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium bg-yellow-400 text-blue-900 hover:bg-yellow-300 transition-all"
+                  >
+                    จัดการ
+                  </Link>
+                )}
+                <Link
+                  href="/dashboard"
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium text-blue-100 hover:bg-blue-700 hover:text-white transition-all"
+                >
+                  แดชบอร์ด
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-blue-100 hover:bg-blue-700 hover:text-white transition-all"
+                >
+                  เข้าสู่ระบบ
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-yellow-400 text-blue-900 hover:bg-yellow-300 transition-all"
+                >
+                  สมัครสมาชิก
+                </Link>
+              </>
+            )}
+          </div>
+
           {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -100,6 +183,32 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
+          <div className="border-t border-blue-700 mt-2 pt-2 space-y-1">
+            {user ? (
+              <>
+                <Link href="/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 rounded-lg text-sm font-medium text-blue-100 hover:bg-blue-700">
+                  👤 โปรไฟล์
+                </Link>
+                <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 rounded-lg text-sm font-medium text-blue-100 hover:bg-blue-700">
+                  📊 แดชบอร์ด
+                </Link>
+                {user.role === "admin" && (
+                  <Link href="/admin" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 rounded-lg text-sm font-medium text-blue-100 hover:bg-blue-700">
+                    ⚙️ ระบบจัดการ
+                  </Link>
+                )}
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 rounded-lg text-sm font-medium text-blue-100 hover:bg-blue-700">
+                  เข้าสู่ระบบ
+                </Link>
+                <Link href="/register" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 rounded-lg text-sm font-semibold bg-yellow-400 text-blue-900 hover:bg-yellow-300">
+                  สมัครสมาชิก
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       )}
     </nav>

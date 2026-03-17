@@ -5,7 +5,10 @@
       "Bash(npm run:*)",
       "mcp__Claude_Preview__preview_start",
       "Bash(ls C:/Users/teera/Desktop/nextjs-projects/saamh/node_modules/.bin/next*)",
-      "WebFetch(domain:script.google.com)"
+      "WebFetch(domain:script.google.com)",
+      "Bash(mkdir -p \"/c/Users/teera/Desktop/nextjs-projects/saamh/src/app/admin/seminars/[id]/registrations\")",
+      "Bash(mkdir -p \"/c/Users/teera/Desktop/nextjs-projects/saamh/src/app/admin/seminars/[id]/edit\")",
+      "Bash(npx tsc:*)"
     ]
   }
 }
