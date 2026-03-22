@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
 import { headers } from "next/headers";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // ใช้ auth client ตรวจสอบ session เท่านั้น
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -11,7 +13,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  // ใช้ admin client (service role) ดึง profile เพื่อ bypass RLS
+  const adminDb = createAdminClient();
+  const { data: profile } = await adminDb
     .from("profiles")
     .select("role")
     .eq("id", user.id)

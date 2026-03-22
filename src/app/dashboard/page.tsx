@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -10,16 +11,31 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Fetch profile
-  const { data: profile } = await supabase
+  // ใช้ admin client เพื่อดึง profile ของตัวเอง (bypass RLS กรณี profile ยังไม่ถูกสร้าง)
+  const adminDb = createAdminClient();
+
+  const { data: profile } = await adminDb
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
+  // ถ้ายังไม่มี profile ให้สร้างอัตโนมัติ
+  if (!profile) {
+    await adminDb.from("profiles").upsert({
+      id: user.id,
+      email: user.email ?? "",
+      full_name: user.user_metadata?.full_name ?? "",
+      phone: user.user_metadata?.phone ?? "",
+      school: user.user_metadata?.school ?? "",
+      member_type: user.user_metadata?.member_type ?? "สามัญ",
+      role: "pending",
+    }, { onConflict: "id", ignoreDuplicates: true });
+  }
+
   const role = profile?.role ?? "pending";
 
-  // Admin dashboard stats
+  // Admin dashboard stats — ใช้ admin client bypass RLS
   if (role === "admin") {
     const [
       { count: totalMembers },
@@ -28,11 +44,11 @@ export default async function DashboardPage() {
       { count: seminarCount },
       { data: pendingProfiles },
     ] = await Promise.all([
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "member"),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "pending"),
-      supabase.from("news").select("*", { count: "exact", head: true }),
-      supabase.from("seminars").select("*", { count: "exact", head: true }),
-      supabase.from("profiles").select("id,full_name,email,school,created_at").eq("role", "pending").limit(5),
+      adminDb.from("profiles").select("*", { count: "exact", head: true }).eq("role", "member"),
+      adminDb.from("profiles").select("*", { count: "exact", head: true }).eq("role", "pending"),
+      adminDb.from("news").select("*", { count: "exact", head: true }),
+      adminDb.from("seminars").select("*", { count: "exact", head: true }),
+      adminDb.from("profiles").select("id,full_name,email,school,created_at").eq("role", "pending").order("created_at", { ascending: false }).limit(5),
     ]);
 
     return (

@@ -11,10 +11,14 @@ function adminClient() {
 }
 
 async function verifyAdmin() {
+  // ใช้ auth client (anon) ตรวจสอบ session
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+
+  // ใช้ admin client (service role) ดึง profile เพื่อ bypass RLS
+  const admin = adminClient();
+  const { data: profile } = await admin.from("profiles").select("role").eq("id", user.id).single();
   if (!profile || profile.role !== "admin") return null;
   return user;
 }
