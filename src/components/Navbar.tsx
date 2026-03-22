@@ -135,6 +135,14 @@ export default function Navbar() {
                 >
                   แดชบอร์ด
                 </Link>
+                <form action="/auth/signout" method="post">
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium text-blue-100 hover:bg-red-600 hover:text-white transition-all"
+                  >
+                    ออกจากระบบ
+                  </button>
+                </form>
               </>
             ) : (
               <>
@@ -197,6 +205,11 @@ export default function Navbar() {
                     ⚙️ ระบบจัดการ
                   </Link>
                 )}
+                <form action="/auth/signout" method="post">
+                  <button type="submit" className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-red-300 hover:bg-red-700 hover:text-white transition-colors">
+                    🚪 ออกจากระบบ
+                  </button>
+                </form>
               </>
             ) : (
               <>

@@ -1,15 +1,9 @@
 -- ============================================================
--- SAAMH System Migration
+-- SAAMH System Migration (Fixed Order)
 -- ============================================================
 
--- Helper function to check admin role (SECURITY DEFINER avoids RLS recursion)
-CREATE OR REPLACE FUNCTION is_admin()
-RETURNS BOOLEAN AS $$
-  SELECT role = 'admin' FROM profiles WHERE id = auth.uid();
-$$ LANGUAGE SQL SECURITY DEFINER;
-
 -- ============================================================
--- PROFILES (linked to auth.users)
+-- PROFILES (linked to auth.users) -- สร้างก่อน is_admin()
 -- ============================================================
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -25,34 +19,40 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Helper function (ต้องสร้างหลัง profiles table)
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT role = 'admin' FROM profiles WHERE id = auth.uid();
+$$ LANGUAGE SQL SECURITY DEFINER;
+
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Users can view their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile"
   ON profiles FOR SELECT
   USING (auth.uid() = id);
 
--- Users can update their own profile
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
   USING (auth.uid() = id);
 
--- Admins can view all profiles
+DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
 CREATE POLICY "Admins can view all profiles"
   ON profiles FOR SELECT
   USING (is_admin());
 
--- Admins can update all profiles
+DROP POLICY IF EXISTS "Admins can update all profiles" ON profiles;
 CREATE POLICY "Admins can update all profiles"
   ON profiles FOR UPDATE
   USING (is_admin());
 
--- Admins can delete profiles
+DROP POLICY IF EXISTS "Admins can delete profiles" ON profiles;
 CREATE POLICY "Admins can delete profiles"
   ON profiles FOR DELETE
   USING (is_admin());
 
--- Trigger to auto-create profile on user signup
+-- Trigger: auto-create profile เมื่อสมัครสมาชิก
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -107,10 +107,12 @@ CREATE TABLE IF NOT EXISTS news (
 
 ALTER TABLE news ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read published news" ON news;
 CREATE POLICY "Public read published news"
   ON news FOR SELECT
   USING (published = true);
 
+DROP POLICY IF EXISTS "Admins manage news" ON news;
 CREATE POLICY "Admins manage news"
   ON news
   USING (is_admin());
@@ -121,25 +123,11 @@ CREATE TRIGGER news_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ============================================================
--- COMMITTEE
+-- COMMITTEE (เพิ่มคอลัมน์ profile_id ถ้าตารางมีอยู่แล้ว)
 -- ============================================================
-CREATE TABLE IF NOT EXISTS committee (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  position TEXT NOT NULL,
-  school TEXT DEFAULT '',
-  photo_id TEXT DEFAULT '',
-  sort_order INTEGER DEFAULT 0,
-  profile_id UUID REFERENCES profiles(id),
-  created_at TIMESTAMPTZ DEFAULT now()
-);
+ALTER TABLE committee ADD COLUMN IF NOT EXISTS profile_id UUID REFERENCES profiles(id);
 
-ALTER TABLE committee ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Public read committee"
-  ON committee FOR SELECT
-  USING (true);
-
+DROP POLICY IF EXISTS "Admins manage committee" ON committee;
 CREATE POLICY "Admins manage committee"
   ON committee
   USING (is_admin());
@@ -163,10 +151,12 @@ CREATE TABLE IF NOT EXISTS seminars (
 
 ALTER TABLE seminars ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read seminars" ON seminars;
 CREATE POLICY "Public read seminars"
   ON seminars FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins manage seminars" ON seminars;
 CREATE POLICY "Admins manage seminars"
   ON seminars
   USING (is_admin());
@@ -194,31 +184,22 @@ CREATE TABLE IF NOT EXISTS seminar_registrations (
 
 ALTER TABLE seminar_registrations ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can insert registration" ON seminar_registrations;
 CREATE POLICY "Anyone can insert registration"
   ON seminar_registrations FOR INSERT
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Users can view own registrations" ON seminar_registrations;
 CREATE POLICY "Users can view own registrations"
   ON seminar_registrations FOR SELECT
-  USING (
-    profile_id = auth.uid() OR is_admin()
-  );
+  USING (profile_id = auth.uid() OR is_admin());
 
+DROP POLICY IF EXISTS "Admins can update registrations" ON seminar_registrations;
 CREATE POLICY "Admins can update registrations"
   ON seminar_registrations FOR UPDATE
   USING (is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete registrations" ON seminar_registrations;
 CREATE POLICY "Admins can delete registrations"
   ON seminar_registrations FOR DELETE
   USING (is_admin());
-
--- ============================================================
--- INITIAL DATA NOTES
--- ============================================================
--- To create admin user:
--- 1. Go to Supabase Dashboard > Authentication > Users > Add User
---    Email: admin@saamh.ac.th
---    Password: Am12345678
---    (check "Auto Confirm User")
--- 2. Then run:
---    UPDATE profiles SET role='admin', full_name='ผู้ดูแลระบบ' WHERE email='admin@saamh.ac.th';
