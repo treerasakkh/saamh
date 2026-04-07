@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import Image from "next/image";
 
 const navLinks = [
   { href: "#home", label: "หน้าแรก" },
@@ -78,8 +79,14 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <a href="#home" className="flex items-center gap-3 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400 text-blue-900 font-bold text-sm shadow-md group-hover:scale-110 transition-transform">
-              ส.บ.
+            <div className="relative h-10 w-10 rounded-full overflow-hidden group-hover:scale-110 transition-transform ring-2 ring-yellow-400/60">
+              <Image
+                src="/logo.png"
+                alt="โลโก้ สมาคมผู้บริหารโรงเรียนมัธยมศึกษา จังหวัดมุกดาหาร"
+                fill
+                className="object-cover"
+                priority
+              />
             </div>
             <div className="hidden sm:block">
               <p className="text-white font-bold text-sm leading-tight">ส.บ.ม.ม.ห.</p>

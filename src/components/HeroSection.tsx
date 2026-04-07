@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-900">
@@ -9,19 +11,16 @@ export default function HeroSection() {
       </div>
 
       <div className="relative z-10 text-center px-4 py-24 max-w-4xl mx-auto animate-fadeInUp">
-        {/* Emblem */}
+        {/* Logo */}
         <div className="mx-auto mb-8 flex items-center justify-center animate-float">
-          <div className="relative w-36 h-36">
-            {/* Outer ring */}
-            <div className="absolute inset-0 rounded-full border-4 border-yellow-400/60" />
-            <div className="absolute inset-2 rounded-full border-2 border-yellow-400/40" />
-            {/* Inner circle */}
-            <div className="absolute inset-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-2xl">
-              <div className="text-center">
-                <p className="text-blue-900 font-black text-base leading-tight">ส.บ.</p>
-                <p className="text-blue-900 font-black text-base leading-tight">ม.ม.ห.</p>
-              </div>
-            </div>
+          <div className="relative w-40 h-40 rounded-full overflow-hidden ring-4 ring-yellow-400/60 shadow-2xl shadow-yellow-400/20">
+            <Image
+              src="/logo.png"
+              alt="โลโก้ สมาคมผู้บริหารโรงเรียนมัธยมศึกษา จังหวัดมุกดาหาร"
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
 
