@@ -12,14 +12,8 @@ export default function AboutSection() {
           {/* Logo & Name */}
           <div className="lg:col-span-1 flex flex-col items-center text-center">
             <div className="relative mb-6 animate-float">
-              <div className="w-40 h-40 rounded-full border-4 border-yellow-400/60 flex items-center justify-center bg-gradient-to-br from-blue-800 to-indigo-900 shadow-2xl">
-                <div className="w-32 h-32 rounded-full border-2 border-yellow-400/40 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-yellow-400 font-black text-2xl leading-tight">ส.บ.</p>
-                    <p className="text-yellow-400 font-black text-2xl leading-tight">ม.ม.ห.</p>
-                    <p className="text-blue-300 text-xs mt-1">S.A.A.M.H.</p>
-                  </div>
-                </div>
+              <div className="relative w-40 h-40 rounded-full overflow-hidden ring-4 ring-yellow-400/60 shadow-2xl shadow-yellow-400/20">
+                <img src="/logo.png" alt="โลโก้สมาคม" className="object-cover w-full h-full" />
               </div>
             </div>
             <h3 className="text-white font-bold text-lg leading-snug max-w-xs">

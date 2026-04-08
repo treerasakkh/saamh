@@ -160,8 +160,8 @@ export default async function DashboardPage() {
         {/* Profile summary */}
         <div className="rounded-2xl bg-gradient-to-r from-blue-800 to-blue-700 p-6 text-white shadow-lg">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-yellow-400 text-blue-900 font-bold text-lg shadow-md">
-              {(profile?.full_name || "ส").charAt(0)}
+            <div className="relative h-14 w-14 rounded-full overflow-hidden ring-2 ring-yellow-400/60 shadow-md shrink-0">
+              <img src="/logo.png" alt="โลโก้สมาคม" className="object-cover w-full h-full" />
             </div>
             <div>
               <h2 className="text-lg font-bold">{profile?.full_name || "ไม่ระบุชื่อ"}</h2>

@@ -34,8 +34,8 @@ export default function AdminSidebar({ currentPath }: AdminSidebarProps) {
       {/* Logo */}
       <div className="px-6 py-5 border-b border-blue-700">
         <Link href="/admin" className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-400 text-blue-900 font-bold text-sm shadow-md">
-            ส.บ.
+          <div className="relative h-9 w-9 rounded-full overflow-hidden ring-2 ring-yellow-400/60 shadow-md shrink-0">
+            <img src="/logo.png" alt="โลโก้สมาคม" className="object-cover w-full h-full" />
           </div>
           <div>
             <p className="text-white font-bold text-sm">ส.บ.ม.ม.ห.</p>
@@ -96,8 +96,8 @@ export default function AdminSidebar({ currentPath }: AdminSidebarProps) {
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-blue-800 px-4 py-3 flex items-center justify-between shadow-md">
         <Link href="/admin" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 text-blue-900 font-bold text-xs shadow-md">
-            ส.บ.
+          <div className="relative h-8 w-8 rounded-full overflow-hidden ring-2 ring-yellow-400/60 shadow-md shrink-0">
+            <img src="/logo.png" alt="โลโก้สมาคม" className="object-cover w-full h-full" />
           </div>
           <span className="text-white font-bold text-sm">ระบบจัดการ</span>
         </Link>

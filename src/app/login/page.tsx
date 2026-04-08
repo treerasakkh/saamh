@@ -41,8 +41,8 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="mb-6 text-center">
           <div className="mb-3 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-400 text-blue-900 font-bold text-sm shadow-md">
-              ส.บ.
+            <div className="relative h-16 w-16 rounded-full overflow-hidden ring-2 ring-yellow-400/60 shadow-md">
+              <img src="/logo.png" alt="โลโก้สมาคม" className="object-cover w-full h-full" />
             </div>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">เข้าสู่ระบบ</h1>
