@@ -32,6 +32,9 @@ export default function ProfilePage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState({ full_name: "", phone: "", school: "" });
+  const [changingPw, setChangingPw] = useState(false);
+  const [pwData, setPwData] = useState({ current: "", newPw: "", confirm: "" });
+  const [pwSaving, setPwSaving] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -228,6 +231,98 @@ export default function ProfilePage() {
                 </span>
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Change password */}
+        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">เปลี่ยนรหัสผ่าน</h2>
+            {!changingPw && (
+              <button
+                onClick={() => setChangingPw(true)}
+                className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                เปลี่ยนรหัสผ่าน
+              </button>
+            )}
+          </div>
+
+          {changingPw && (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (pwData.newPw !== pwData.confirm) {
+                  setError("รหัสผ่านใหม่ไม่ตรงกัน");
+                  return;
+                }
+                if (pwData.newPw.length < 6) {
+                  setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+                  return;
+                }
+                setPwSaving(true);
+                setError(null);
+                setSuccessMsg(null);
+                const supabase = createClient();
+                // ยืนยัน current password ก่อน
+                const { error: signInErr } = await supabase.auth.signInWithPassword({
+                  email: profile.email,
+                  password: pwData.current,
+                });
+                if (signInErr) {
+                  setError("รหัสผ่านปัจจุบันไม่ถูกต้อง");
+                  setPwSaving(false);
+                  return;
+                }
+                const { error: updateErr } = await supabase.auth.updateUser({ password: pwData.newPw });
+                setPwSaving(false);
+                if (updateErr) {
+                  setError("เปลี่ยนรหัสผ่านไม่สำเร็จ: " + updateErr.message);
+                } else {
+                  setSuccessMsg("เปลี่ยนรหัสผ่านสำเร็จ");
+                  setChangingPw(false);
+                  setPwData({ current: "", newPw: "", confirm: "" });
+                }
+              }}
+              className="space-y-4"
+            >
+              {[
+                { label: "รหัสผ่านปัจจุบัน", key: "current" },
+                { label: "รหัสผ่านใหม่", key: "newPw" },
+                { label: "ยืนยันรหัสผ่านใหม่", key: "confirm" },
+              ].map((f) => (
+                <div key={f.key}>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">{f.label}</label>
+                  <input
+                    type="password"
+                    required
+                    value={(pwData as Record<string, string>)[f.key]}
+                    onChange={(e) => setPwData((p) => ({ ...p, [f.key]: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                  />
+                </div>
+              ))}
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="submit"
+                  disabled={pwSaving}
+                  className="rounded-lg bg-blue-800 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
+                >
+                  {pwSaving ? "กำลังบันทึก..." : "บันทึกรหัสผ่านใหม่"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setChangingPw(false); setError(null); setPwData({ current: "", newPw: "", confirm: "" }); }}
+                  className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </form>
+          )}
+
+          {!changingPw && (
+            <p className="text-sm text-gray-400">••••••••</p>
           )}
         </div>
 
