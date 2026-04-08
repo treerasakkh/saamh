@@ -87,7 +87,7 @@ export default function MembersClient({ members }: { members: Member[] }) {
             />
           </div>
           <a
-            href="#"
+            href="/register"
             className="flex items-center gap-2 px-6 py-2.5 bg-blue-900 text-white font-semibold text-sm rounded-xl hover:bg-blue-800 transition-colors shadow-sm whitespace-nowrap"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
